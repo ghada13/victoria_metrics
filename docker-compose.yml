@@ -1,0 +1,39 @@
+services:
+  fastapi-app:
+    build: .
+    container_name: fastapi-victoria
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+    environment:
+      - ENV=development
+    command: >
+      uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    depends_on:
+      - victoria
+    networks:
+      - victoria_network
+
+  victoria:
+    image: victoriametrics/victoria-metrics:latest
+    container_name: victoria_db
+    ports:
+      - "8428:8428"      # HTTP API
+      - "8189:8189"      # InfluxDB TCP API
+    command:
+      - '--influxListenAddr=:8189'
+      - '--storageDataPath=/victoria-metrics-data'
+      - '--memory.allowedPercent=25'
+      - '--inmemoryDataFlushInterval=1s'
+      - '--retentionPeriod=1y'
+    volumes:
+      - victoria_data_db:/victoria-metrics-data
+    networks:
+      - victoria_network
+
+volumes:
+  victoria_data_db:
+
+networks:
+  victoria_network:
