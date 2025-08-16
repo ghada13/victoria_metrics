@@ -1,0 +1,11 @@
+groups:
+  - name: courant-alert
+    rules:
+      - alert: HighCourant
+        expr: Temperature_value > 30
+        for: 5s
+        labels:
+          severity: critical
+        annotations:
+          summary: "Courant élevé"
+          description: "Temperature value is above 30"

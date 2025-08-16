@@ -1,9 +1,10 @@
+
 services:
   fastapi-app:
     build: .
     container_name: fastapi-victoria
     ports:
-      - "8000:8000"
+      - "8001:8000"
     volumes:
       - .:/app
     environment:
@@ -31,6 +32,25 @@ services:
       - victoria_data_db:/victoria-metrics-data
     networks:
       - victoria_network
+
+  vmalert:
+    image: victoriametrics/vmalert
+    container_name: vmalert
+    command:
+      - '--rule=/config/rules.yml'
+      - '--datasource.url=http://victoria:8428'
+      - '--notifier.blackhole'
+      - '--evaluationInterval=10s'
+    volumes:
+      - ./config:/config
+    ports:
+      - "8880:8880" # interface web
+    depends_on:
+      - victoria
+    networks:
+      - victoria_network
+
+
 
 volumes:
   victoria_data_db:

@@ -1,0 +1,18 @@
+{
+  "ranges": [
+    {
+      "rows": [
+        {
+          "metric_name": "Temperature_value",
+          "timestamp": 1755020349,
+          "value": 100
+        },
+        {
+          "metric_name": "Temperature_value",
+          "timestamp": 1755020409,
+          "value": 105
+        }
+      ]
+    }
+  ]
+}

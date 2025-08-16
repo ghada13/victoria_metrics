@@ -1,0 +1,10 @@
+import httpx
+
+async def get_vm_time() -> int:
+    url = "http://148.253.86.63:8428/api/v1/query?query=time()"
+    async with httpx.AsyncClient() as client:
+        resp = await client.get(url)
+        resp.raise_for_status()
+        data = resp.json()
+        vm_time = int(float(data['data']['result'][0]['value'][1]))
+        return vm_time

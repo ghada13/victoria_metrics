@@ -1,5 +1,8 @@
 import json
 from typing import Dict, List
+from datetime import datetime
+from helpers.vm_time_handler import get_vm_time
+
 
 
 def string_formatter(text: str, context: str = "tag") -> str:
@@ -51,14 +54,13 @@ def timestamp_to_nanosecond(base_timestamp: int, range_index: int, delta: float)
     timestamp_in_nanosecond = (base_timestamp + range_index * delta) * 1_000_000_000
     return int(timestamp_in_nanosecond)
 
-
-def convert_json_to_line_protocol(egauge_data: Dict) -> List[str]:
+def convert_json_to_line_protocol(egauge_data: Dict, time_diff: int = 0) -> List[str]:
     all_registers = egauge_data["registers"]
     all_ranges = egauge_data["ranges"]
     all_line_protocols = []
 
     for range_item in all_ranges:
-        base_timestamp = int(range_item["ts"])
+        base_timestamp = int(range_item["ts"]) + time_diff  # <-- ajustement
         delta = float(range_item["delta"])
 
         for row_index, row in enumerate(range_item["rows"][1:], 1):
@@ -79,6 +81,7 @@ def convert_json_to_line_protocol(egauge_data: Dict) -> List[str]:
     return all_line_protocols
 
 
+
 def load_egauge_data_service() -> List[str]:
     with open("egauge_data.log") as log_file:
         all_json_data = json.load(log_file)
@@ -89,3 +92,12 @@ def load_egauge_data_service() -> List[str]:
         print(all_line_protocol_data[0])
 
         return all_line_protocol_data
+
+
+async def prepare_lines(payload_dict):
+    vm_time = await get_vm_time()
+    local_time = int(datetime.utcnow().timestamp())
+    time_diff = vm_time - local_time
+
+    lines = convert_json_to_line_protocol(payload_dict, time_diff=time_diff)
+    return lines
